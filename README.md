@@ -1,47 +1,95 @@
-# OpenNext Starter
+# Smart Reader Docs
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Aplikasi untuk mengunggah dokumen finansial (invoice, receipt, quotation, dll) lalu mengekstrak datanya secara otomatis dengan AI vision model. User bisa mereview, mengedit, dan mengekspor hasilnya ke CSV.
 
-## Getting Started
+## Stack
 
-Read the documentation at https://opennext.js.org/cloudflare.
+- **Next.js 16** (App Router) + React 19 + TypeScript
+- **Cloudflare Workers** via OpenNext sebagai runtime production
+- **Cloudflare D1** (SQLite) untuk database, **R2** untuk file storage, **Images** binding untuk thumbnail
+- **NextAuth v5** dengan GitHub OAuth + JWT session, D1Adapter
+- **TanStack Query** untuk data fetching dan caching, **TanStack Table** untuk dashboard
+- **Tailwind v4** + shadcn/ui untuk UI
+- **Gemini 2.5 Flash** sebagai vision model untuk OCR/ekstraksi
+- **Vitest** + fast-check untuk unit & property-based tests
 
-## Develop
+## Pendekatan OCR/AI
 
-Run the Next.js development server:
+Saya pakai **single-shot vision LLM (Gemini 2.5 Flash)** dengan prompt yang strict-format JSON
+
+Alasannya:
+
+- Dokumen finansial sangat bervariasi layout-nya. Tradisional OCR butuh template engine atau model NER terpisah agar bisa mapping "nilai 100.000 ini ke field mana". Vision LLM bisa langsung memahami konteks visual + spasial dalam satu panggilan.
+- Gemini 2.5 Flash relatif murah dan cepat, sudah cukup akurat untuk bahasa Indonesia + simbol Rupiah, dan bisa mengembalikan structured JSON dengan response schema enforcement.
+- Saya juga minta model mengembalikan **confidence scores per field**. Ini jauh lebih useful daripada OCR confidence per karakter karena bisa langsung dipakai untuk highlight UI dan trigger manual review.
+- Prompt juga eksplisit menolak gambar non-dokumen (foto orang, meme, dll) dan dokumen yang terlalu blur — model langsung return error code, bukan halusinasi data acak.
+
+## Asumsi yang Diambil
+
+- **User base kecil** (single tenant feel). Tidak ada role/permission complex, tidak ada multi-org.
+- **File size** dibatasi 10 MB, hanya PNG/JPEG/WebP/PDF. PDF di-handle sebagai gambar (rendering halaman pertama).
+- **Confidence threshold 0.7**. Skor di bawah ini dianggap "low confidence" dan field di-highlight di review form.
+- **Hasil ekstraksi tidak immutable**. User bisa edit di review form sebelum mark sebagai ready.
+
+## AI Workflow Log
+
+Sebagian besar pengerjaan project ini saya pakai **Kiro** sebagai pair programmer. Berikut breakdown-nya:
+
+### Tools yang digunakan
+
+- **Kiro (Spec Mode)** — untuk drafting requirements doc, design doc, dan task list di awal project.
+- **Kiro (Vibe Mode)** — untuk implementasi per-task: write file, refactor, debug deployment issues.
+- **Gemini 2.5 Flash** — production-time, untuk OCR/extraction itu sendiri.
+
+
+## Cara Menangani Akurasi Rendah
+
+Beberapa lapis pertahanan:
+
+1. **Per-field confidence scores** dari model. Field dengan skor < 0.7 di-highlight kuning di review form, supaya user fokus mengoreksi yang berisiko.
+2. **Status `review` wajib sebelum `ready`**. Tidak ada auto-confirm. User harus eksplisit submit review form sebelum dokumen bisa diekspor sebagai data final.
+3. **Validation runtime** di `validateExtractionResult` dan `validateReviewForm`: range numerik, ISO 4217 currency, format tanggal, panjang string. Output model yang aneh di-reject sebelum masuk D1.
+4. **Error response dari model**: kalau gambar bukan dokumen atau terlalu blur, model return `{"error": ...}` bukan data ngawur. Saya tangkap dan ubah status ke `uploaded` lagi supaya user bisa upload ulang.
+5. **Edit & re-extract**. User selalu bisa edit manual atau pencet "Re-extract" untuk panggil model lagi (mungkin dengan crop/rotate berbeda).
+
+## Yang Akan Diperbaiki Bila Waktu 2x Lipat
+
+- **Bounding box per field**. Sekarang user lihat hasil ekstraksi terpisah dari gambar. Idealnya, hover field di review form akan highlight area sumber di preview gambar — butuh model yang return koordinat (Gemini 2.0+ bisa, tapi perlu prompt + UI work).
+- **PDF multi-halaman**. Sekarang hanya halaman pertama yang dibaca. Perlu rendering tiap halaman dan logic untuk menggabungkan items.
+- **Background job queue**. Ekstraksi sekarang sinkron via API call. Untuk skala lebih besar, harus di-offload ke Cloudflare Queue + Worker consumer supaya tidak block request, plus retry policy yang proper.
+- **Better mobile UX**. Review form belum optimal di layar kecil; kompresi gambar di client-side juga perlu untuk upload PDF besar.
+- **E2E test** dengan Playwright untuk flow lengkap upload → extract → review → export. Sekarang baru unit + property tests.
+- **Audit log & soft delete**. Untuk dokumen finansial, jejak edit dan undo penting. Sekarang masih hard delete.
+
+## Setup Lokal
 
 ```bash
+# Node 22+ wajib (wrangler requirement)
+nvm use 22
+npm install
+
+# Salin .dev.vars contoh, isi AUTH_SECRET, AUTH_GITHUB_ID/SECRET, GOOGLE_AI_API_KEY
+cp .dev.vars.example .dev.vars
+
+# Apply migration ke D1 lokal
+npx wrangler d1 migrations apply DB --local
+
+# Run dev server
 npm run dev
-# or similar package manager command
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-## Preview
-
-Preview the application locally on the Cloudflare runtime:
+## Deploy ke Cloudflare
 
 ```bash
-npm run preview
-# or similar package manager command
-```
+# Apply migration ke remote D1
+npx wrangler d1 migrations apply DB --remote
 
-## Deploy
+# Set secrets (sekali per secret)
+npx wrangler secret put AUTH_SECRET
+npx wrangler secret put AUTH_GITHUB_ID
+npx wrangler secret put AUTH_GITHUB_SECRET
+npx wrangler secret put GOOGLE_AI_API_KEY
 
-Deploy the application to Cloudflare:
-
-```bash
+# Deploy
 npm run deploy
-# or similar package manager command
 ```
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
