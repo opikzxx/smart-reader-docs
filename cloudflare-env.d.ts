@@ -8,6 +8,10 @@ interface __BaseEnv_CloudflareEnv {
 	NEXTJS_ENV: string;
 	WORKER_SELF_REFERENCE: Fetcher /* superbrands-test */;
 	R2_BUCKET: R2Bucket;
+	AUTH_SECRET: string;
+	AUTH_GITHUB_ID: string;
+	AUTH_GITHUB_SECRET: string;
+	GOOGLE_AI_API_KEY: string;
 }
 declare namespace Cloudflare {
 	interface Env extends __BaseEnv_CloudflareEnv {}

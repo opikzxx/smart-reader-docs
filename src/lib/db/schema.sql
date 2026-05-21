@@ -42,3 +42,31 @@ CREATE TABLE IF NOT EXISTS verification_tokens (
     expires TEXT NOT NULL,
     UNIQUE (identifier, token)
 );
+
+-- Documents table: stores uploaded document metadata
+CREATE TABLE IF NOT EXISTS documents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    file_name TEXT NOT NULL,
+    r2_key TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'uploaded',
+    user_id TEXT NOT NULL,
+    vendor_name TEXT,
+    date TEXT,
+    total REAL,
+    currency TEXT,
+    confidence_scores TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Extracted items table: stores line items extracted from documents
+CREATE TABLE IF NOT EXISTS extracted_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    document_id INTEGER NOT NULL,
+    description TEXT NOT NULL,
+    quantity REAL NOT NULL,
+    unit_price REAL NOT NULL,
+    amount REAL NOT NULL,
+    FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE
+);

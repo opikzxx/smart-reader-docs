@@ -18,11 +18,6 @@ function createEmptyItem(): ExtractedItem {
   };
 }
 
-/**
- * Editable table for document line items.
- * Supports add/remove rows (min 0, max 100 items).
- * Uses semantic HTML table with th scope attributes and caption.
- */
 export function ItemsTable({ items, onChange }: ItemsTableProps) {
   const handleAddRow = () => {
     if (items.length >= MAX_ITEMS) return;

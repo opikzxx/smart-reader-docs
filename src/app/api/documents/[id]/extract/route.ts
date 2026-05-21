@@ -4,7 +4,6 @@ import { parseLLMResponse } from "@/lib/documents/llm-parser";
 import { withD1Retry, handleD1Error } from "@/lib/db/retry";
 import type { ExtractionResult } from "@/lib/documents/types";
 
-export const runtime = "edge";
 
 const EXTRACTION_PROMPT = `You are a financial document extraction AI. Analyze this image and determine if it is a valid financial document (invoice, receipt, bill, quotation, purchase order, etc.).
 

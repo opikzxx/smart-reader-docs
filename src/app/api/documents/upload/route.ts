@@ -1,18 +1,9 @@
 import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-export const runtime = "edge";
 
 /**
  * POST /api/documents/upload
- *
- * Prepares a document upload by generating a unique ID and r2_key.
- * Returns the r2_key and a url for the client to PUT the file to.
- * The url points to the PUT /api/documents/upload/[id]?r2_key=... endpoint
- * which uploads directly to R2 using the native binding.
- *
- * Request body: { file_name: string }
- * Response: { url: string, r2_key: string }
  */
 export async function POST(request: Request) {
   try {

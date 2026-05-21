@@ -4,7 +4,6 @@ import { validateFile } from "@/lib/documents/validation";
 import { withD1Retry, handleD1Error } from "@/lib/db/retry";
 import { auth } from "@/auth";
 
-export const runtime = "edge";
 
 export async function GET(request: NextRequest) {
   try {
@@ -78,10 +77,6 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/documents
- *
- * Supports two content types:
- * - multipart/form-data: Upload file to R2 and create DB record (file upload flow)
- * - application/json: Create DB record with existing R2 key (JSON creation flow)
  */
 export async function POST(request: Request) {
   const contentType = request.headers.get("content-type") || "";

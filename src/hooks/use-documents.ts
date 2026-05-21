@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { documentKeys } from '@/lib/documents/query-keys';
 import type { Document, DocumentFilters } from '@/lib/documents/types';
 
@@ -46,5 +46,6 @@ export function useDocuments(filters: DocumentFilters = {}) {
     queryFn: () => fetchDocuments(filters),
     staleTime: 30 * 1000,
     retry: 3,
+    placeholderData: keepPreviousData,
   });
 }

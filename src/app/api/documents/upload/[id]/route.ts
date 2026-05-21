@@ -1,18 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-export const runtime = "edge";
 
 /**
  * PUT /api/documents/upload/[id]
- *
- * Uploads a file to R2 using the native R2 bucket binding.
- * The client sends the raw file body with a Content-Type header.
- * The r2_key is passed as a query parameter or header.
- *
- * Query params: r2_key (required) - the R2 object key from the POST response
- * Body: raw file content
- * Response: { r2_key: string, success: true }
  */
 export async function PUT(
   request: NextRequest,

@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, X, Upload, Calendar, Loader2, Download, FileSpreadsheet, FileText } from 'lucide-react';
+import { Search, X, Upload, Calendar, Loader2, Download, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,6 @@ interface DocumentsToolbarProps {
   isFetching: boolean;
   totalResults: number;
   onExportCsv?: () => void;
-  onExportXlsx?: () => void;
   canExport?: boolean;
 }
 
@@ -51,7 +50,6 @@ export function DocumentsToolbar({
   isFetching,
   totalResults,
   onExportCsv,
-  onExportXlsx,
   canExport,
 }: DocumentsToolbarProps) {
   return (
@@ -81,10 +79,6 @@ export function DocumentsToolbar({
               <DropdownMenuItem onClick={() => onExportCsv?.()} className="gap-2 cursor-pointer">
                 <FileText className="h-4 w-4 text-muted-foreground" />
                 Export as CSV
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onExportXlsx?.()} className="gap-2 cursor-pointer">
-                <FileSpreadsheet className="h-4 w-4 text-green-500" />
-                Export as Excel
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

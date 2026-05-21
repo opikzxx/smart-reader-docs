@@ -1,4 +1,3 @@
-import * as XLSX from 'xlsx';
 import type { Document } from './documents/types';
 
 const SEPARATOR = ';';
@@ -117,44 +116,4 @@ export function generateCsv(documents: Document[]): void {
   URL.revokeObjectURL(url);
 }
 
-/**
- * Generates an XLSX file with proper column widths and formatting, then triggers download.
- */
-export function generateXlsx(documents: Document[]): void {
-  const rows = buildRows(documents);
 
-  const worksheet = XLSX.utils.json_to_sheet(rows);
-
-  // Set column widths for readability
-  worksheet['!cols'] = [
-    { wch: 4 },   // No
-    { wch: 35 },  // File Name
-    { wch: 25 },  // Vendor Name
-    { wch: 14 },  // Document Date
-    { wch: 15 },  // Total Amount
-    { wch: 10 },  // Currency
-    { wch: 12 },  // Status
-    { wch: 12 },  // Items Count
-    { wch: 18 },  // Uploaded At
-  ];
-
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Documents');
-
-  // Generate buffer and download
-  const xlsxBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  const blob = new Blob([xlsxBuffer], {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  });
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = getFileName('xlsx');
-  link.style.display = 'none';
-  document.body.appendChild(link);
-  link.click();
-
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}

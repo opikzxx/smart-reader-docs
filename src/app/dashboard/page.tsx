@@ -9,7 +9,7 @@ import { DataTable } from '@/components/dashboard/data-table';
 import { documentsColumns } from '@/components/dashboard/documents-columns';
 import { DocumentsToolbar } from '@/components/dashboard/documents-toolbar';
 import { Button } from '@/components/ui/button';
-import { generateCsv, generateXlsx } from '@/lib/csv-export';
+import { generateCsv } from '@/lib/csv-export';
 import type { DocumentFilters, DocumentStatus } from '@/lib/documents/types';
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -28,23 +28,24 @@ export default function DocumentsPage() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
-  // Sorting state (client-side via TanStack Table)
+  // Sorting state 
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'created_at', desc: true },
   ]);
 
-  // Debounce vendor search to avoid excessive API calls
   const debouncedVendor = useDebounce(vendorSearch, 300);
+  const debouncedDateFrom = useDebounce(dateFrom, 500);
+  const debouncedDateTo = useDebounce(dateTo, 500);
 
   // Build API filters
   const apiFilters: DocumentFilters = useMemo(() => {
     const filters: DocumentFilters = {};
     if (statusFilter.length > 0) filters.statuses = statusFilter;
     if (debouncedVendor) filters.vendor_name = debouncedVendor;
-    if (dateFrom) filters.date_from = dateFrom;
-    if (dateTo) filters.date_to = dateTo;
+    if (debouncedDateFrom) filters.date_from = debouncedDateFrom;
+    if (debouncedDateTo) filters.date_to = debouncedDateTo;
     return filters;
-  }, [statusFilter, debouncedVendor, dateFrom, dateTo]);
+  }, [statusFilter, debouncedVendor, debouncedDateFrom, debouncedDateTo]);
 
   const { data: documents, isLoading, isFetching, isError, error } = useDocuments(apiFilters);
 
@@ -70,11 +71,7 @@ export default function DocumentsPage() {
     }
   }, [documents]);
 
-  const handleExportXlsx = useCallback(() => {
-    if (documents && documents.length > 0) {
-      generateXlsx(documents);
-    }
-  }, [documents]);
+
 
   if (isLoading) {
     return (
@@ -165,7 +162,6 @@ export default function DocumentsPage() {
         isFetching={isFetching}
         totalResults={documents?.length ?? 0}
         onExportCsv={handleExportCsv}
-        onExportXlsx={handleExportXlsx}
         canExport={(documents?.length ?? 0) > 0}
       />
 

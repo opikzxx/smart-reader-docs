@@ -3,7 +3,6 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { withD1Retry, handleD1Error } from "@/lib/db/retry";
 import { auth } from "@/auth";
 
-export const runtime = "edge";
 
 /**
  * GET /api/documents/[id]
@@ -94,10 +93,6 @@ export async function GET(
 
 /**
  * PUT /api/documents/[id]
- *
- * Updates a document with reviewed data (review submission).
- * Accepts a ReviewSubmission payload, validates it, updates the document
- * fields and extracted items, and sets status to "ready".
  */
 export async function PUT(
   request: NextRequest,
