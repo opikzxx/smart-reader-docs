@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useDocument } from '@/hooks/use-document';
 import { useExtractDocument } from '@/hooks/use-extract-document';
 import { ReviewForm } from '@/components/documents/review-form';
+import { DocumentPreview } from '@/components/documents/document-preview';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Button } from '@/components/ui/button';
 import {
@@ -166,6 +167,9 @@ function DocumentDetailContent({ documentId }: { documentId: number }) {
           </div>
         </div>
       </div>
+
+      {/* Original document preview */}
+      <DocumentPreview documentId={document.id} fileName={document.file_name} />
 
       {/* Status-specific content */}
       {document.status === 'uploaded' && (

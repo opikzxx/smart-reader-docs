@@ -54,12 +54,11 @@ Beberapa lapis pertahanan:
 
 ## Yang Akan Diperbaiki Bila Waktu 2x Lipat
 
-- **Bounding box per field**. Sekarang user lihat hasil ekstraksi terpisah dari gambar. Idealnya, hover field di review form akan highlight area sumber di preview gambar — butuh model yang return koordinat (Gemini 2.0+ bisa, tapi perlu prompt + UI work).
 - **PDF multi-halaman**. Sekarang hanya halaman pertama yang dibaca. Perlu rendering tiap halaman dan logic untuk menggabungkan items.
 - **Background job queue**. Ekstraksi sekarang sinkron via API call. Untuk skala lebih besar, harus di-offload ke Cloudflare Queue + Worker consumer supaya tidak block request, plus retry policy yang proper.
-- **Better mobile UX**. Review form belum optimal di layar kecil; kompresi gambar di client-side juga perlu untuk upload PDF besar.
 - **E2E test** dengan Playwright untuk flow lengkap upload → extract → review → export. Sekarang baru unit + property tests.
 - **Audit log & soft delete**. Untuk dokumen finansial, jejak edit dan undo penting. Sekarang masih hard delete.
+- **API KEY** Gemini API Key pakai free tier (lebih dari 20 per day request limit).
 
 ## Setup Lokal
 
