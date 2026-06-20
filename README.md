@@ -52,14 +52,6 @@ Beberapa lapis pertahanan:
 4. **Error response dari model**: kalau gambar bukan dokumen atau terlalu blur, model return `{"error": ...}` bukan data ngawur. Saya tangkap dan ubah status ke `uploaded` lagi supaya user bisa upload ulang.
 5. **Edit & re-extract**. User selalu bisa edit manual atau pencet "Re-extract" untuk panggil model lagi (mungkin dengan crop/rotate berbeda).
 
-## Yang Akan Diperbaiki Bila Waktu 2x Lipat
-
-- **PDF multi-halaman**. Sekarang hanya halaman pertama yang dibaca. Perlu rendering tiap halaman dan logic untuk menggabungkan items.
-- **Background job queue**. Ekstraksi sekarang sinkron via API call. Untuk skala lebih besar, harus di-offload ke Cloudflare Queue + Worker consumer supaya tidak block request, plus retry policy yang proper.
-- **E2E test** dengan Playwright untuk flow lengkap upload → extract → review → export. Sekarang baru unit + property tests.
-- **Audit log & soft delete**. Untuk dokumen finansial, jejak edit dan undo penting. Sekarang masih hard delete.
-- **API KEY** Gemini API Key pakai free tier (lebih dari 20 per day request limit).
-
 ## Setup Lokal
 
 ```bash
